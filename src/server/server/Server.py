@@ -34,7 +34,7 @@ class Server():
             self.__class__.batch_queue.put(frame_data)
 
 
-    def run(self, server_class=http.server.HTTPServer, handler_class=FrameRequestHandler, port=8443):
+    def run(self, server_class=http.server.HTTPServer, handler_class=FrameRequestHandler):
         handler_class.batch_queue = self.batch_queue
         local_ip = socket.gethostbyname(socket.gethostname())
         server_address = (local_ip, port)
@@ -46,7 +46,7 @@ class Server():
         context.load_cert_chain(certfile=self.CERT_FILE, keyfile=self.KEY_FILE)
         httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-        print(f"Starting HTTPS server on ip {local_ip} and port {port}...", end="\n\n")
+        print(f"Starting HTTPS server on ip {local_ip} and port {self.port}...", end="\n\n")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
