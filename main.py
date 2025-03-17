@@ -3,6 +3,7 @@ import threading
 
 import os
 import sys
+import time
 import warnings
 warnings.filterwarnings("ignore")
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "testra", "src"))
@@ -18,10 +19,10 @@ def main(cfg):
     key_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "server", "server", "cert", "key.pem")
     cert_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "server", "server", "cert", "cert.pem")
 
-    server = Server(key_file, cert_file, port=8443, max_queue_size=10000)
+    server = Server(key_file, cert_file, ip="192.168.1.101", port=34545, max_queue_size=10000)
 
     frame_queue = server.get_frame_queue()
-    model = Testra(cfg, frame_queue)
+    model = Testra(cfg, frame_queue, server)
 
     try:
         server_thread = threading.Thread(target=server.run, daemon=True)
@@ -30,7 +31,8 @@ def main(cfg):
         model_thread = threading.Thread(target=model.model_worker, daemon=True)
         model_thread.start()
 
-        model_thread.join()
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         model_thread.join()
         server_thread.join()

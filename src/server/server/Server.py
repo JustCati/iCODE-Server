@@ -7,14 +7,21 @@ from src.server.queue.BatchQueue import BatchQueue
 
 
 class Server():
-    def __init__(self, key_file, cert_file, port=8443, max_queue_size=10000):
+    def __init__(self, key_file, cert_file,  ip = "0.0.0.0", port=8443, visor_callback_port=4444, max_queue_size=10000):
+        self.ip = ip
         self.port = port
         self.KEY_FILE = key_file
         self.CERT_FILE = cert_file
         self.max_queue_size = max_queue_size
 
+        self.handler_class = self.FrameRequestHandler
+        self.httpd = http.server.HTTPServer((self.ip, self.port), self.handler_class)
+
         self.frame_queue = FrameQueue(max_queue_size)
         self.batch_queue = BatchQueue(self.frame_queue, max_queue_size)
+
+        self.handler_class.batch_queue = self.batch_queue
+        self.httpd.server_instance = self
 
 
     class FrameRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -34,23 +41,18 @@ class Server():
             self.__class__.batch_queue.put(frame_data)
 
 
-    def run(self, server_class=http.server.HTTPServer, handler_class=FrameRequestHandler):
-        handler_class.batch_queue = self.batch_queue
-        local_ip = socket.gethostbyname(socket.gethostname())
-        server_address = (local_ip, port)
-        httpd = server_class(server_address, handler_class)
-
+    def run(self):
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         context.load_cert_chain(certfile=self.CERT_FILE, keyfile=self.KEY_FILE)
-        httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+        self.httpd.socket = context.wrap_socket(self.httpd.socket, server_side=True)
 
-        print(f"Starting HTTPS server on ip {local_ip} and port {self.port}...", end="\n\n")
+        print(f"Starting HTTPS server on ip {self.ip} and port {self.port}...", end="\n\n")
         try:
-            httpd.serve_forever()
+            self.httpd.serve_forever()
         except KeyboardInterrupt:
-            httpd.server_close()
+            self.httpd.server_close()
             self.batch_queue.batch_worker_thread.join()
             print("Server has been shut down.")
 
