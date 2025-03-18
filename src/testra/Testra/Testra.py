@@ -69,7 +69,6 @@ class Testra(nn.Module):
 
             # if mode_val != 0:
             if self.server.last_client_ip:
-                #! Check if http or https
                 callback_url = f"http://{self.server.last_client_ip}:{self.server.visor_callback_port}/callback/"
                 payload = {
                     "timestamp": time.time(),
