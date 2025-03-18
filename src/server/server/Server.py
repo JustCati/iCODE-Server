@@ -14,6 +14,9 @@ class Server():
         self.CERT_FILE = cert_file
         self.max_queue_size = max_queue_size
 
+        self.last_client_ip = None
+        self.visor_callback_port = visor_callback_port
+
         self.handler_class = self.FrameRequestHandler
         self.httpd = http.server.HTTPServer((self.ip, self.port), self.handler_class)
 
@@ -30,6 +33,7 @@ class Server():
             print("Received POST request.")
             content_length = int(self.headers.get('Content-Length', 0))
             frame_data = self.rfile.read(content_length)
+            client_ip = self.client_address[0]
             print(f"Received frame ({len(frame_data)} bytes).")
 
             self.send_response(200)
@@ -38,6 +42,7 @@ class Server():
             self.wfile.write(b"OK")
             print("Sent response.")
 
+            self.server.server_instance.last_client_ip = client_ip
             self.__class__.batch_queue.put(frame_data)
 
 

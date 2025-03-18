@@ -1,7 +1,10 @@
 import io
+import time
 import torch
+import requests
 from PIL import Image
 import torch.nn as nn
+from statistics import mode
 import torchvision.transforms as transforms
 
 from src.testra.src.rekognition_online_action_detection.models import build_model
@@ -11,10 +14,11 @@ from src.testra.src.rekognition_online_action_detection.utils.checkpointer impor
 
 
 class Testra(nn.Module):
-    def __init__(self, cfg, frame_queue):
+    def __init__(self, cfg, frame_queue, server):
         super().__init__()
 
         self.cfg = cfg
+        self.server = server
         self.queue = frame_queue
         self.device = setup_environment(cfg)
         checkpointer = setup_checkpointer(cfg, phase='test')
@@ -59,6 +63,22 @@ class Testra(nn.Module):
                 output = self(frames)
             output = torch.softmax(output, dim=1)
             results = output.cpu().numpy()[0]
-
             max_indices = results.argmax(axis=1)
-            print(max_indices)
+            mode_val = mode(max_indices)
+            print(f"Mode: {mode_val}")
+
+            # if mode_val != 0:
+            if self.server.last_client_ip:
+                #! Check if http or https
+                callback_url = f"http://{self.server.last_client_ip}:{self.server.visor_callback_port}/callback/"
+                payload = {
+                    "timestamp": time.time(),
+                    "action": int(mode_val)
+                }
+                try:
+                    response = requests.post(callback_url, json=payload)
+                    print("Sent callback to visor at", callback_url, "Response:", response.status_code)
+                except Exception as e:
+                    print("Error sending callback:", e)
+            else:
+                print("No client IP available for callback.")
