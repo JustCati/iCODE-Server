@@ -67,7 +67,6 @@ class Testra(nn.Module):
             mode_val = mode(max_indices)
             print(f"Mode: {mode_val}")
 
-            # if mode_val != 0:
             if self.server.last_client_ip:
                 callback_url = f"http://{self.server.last_client_ip}:{self.server.visor_callback_port}/callback/"
                 payload = {
