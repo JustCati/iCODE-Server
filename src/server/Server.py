@@ -1,9 +1,8 @@
 import ssl
-import socket
 import http.server
 
-from src.server.queue.FrameQueue import FrameQueue
-from src.server.queue.BatchQueue import BatchQueue
+from src.queue.FrameQueue import FrameQueue
+from src.queue.BatchQueue import BatchQueue
 
 
 class Server():
