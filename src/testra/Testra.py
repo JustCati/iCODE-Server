@@ -31,6 +31,7 @@ class Testra(nn.Module):
         checkpointer.load(self.testra)
 
 
+    #TODO: include the mode calculation in here instead of outside
     def forward(self, x):
         with torch.no_grad(), torch.autocast(device_type="cuda"):
             x = self.backbone(x.to(self.device))
@@ -38,4 +39,3 @@ class Testra(nn.Module):
             x = x.to(self.device)
             x = self.testra(x, x, x)
         return x
-
