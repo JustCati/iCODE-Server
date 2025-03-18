@@ -1,6 +1,3 @@
-import argparse
-import threading
-
 import os
 import io
 import sys
@@ -8,8 +5,9 @@ import time
 import time
 import torch
 import requests
+import argparse
+import threading
 from PIL import Image
-from statistics import mode
 from torchvision import transforms
 
 import warnings
@@ -41,17 +39,12 @@ def model_worker(model, queue, frame_rate, server):
             frames = torch.stack(frames, dim=0)
             with torch.no_grad(), torch.autocast(device_type="cuda"):
                 output = model(frames)
-            output = torch.softmax(output, dim=1)
-            results = output.cpu().numpy()[0]
-            max_indices = results.argmax(axis=1)
-            mode_val = mode(max_indices) #TODO: move the mode calculation to the Testra forward method
-            print(f"Mode: {mode_val}")
 
             if server.last_client_ip:
                 callback_url = f"http://{server.last_client_ip}:{server.visor_callback_port}/callback/"
                 payload = {
                     "timestamp": time.time(),
-                    "action": int(mode_val)
+                    "action": int(output) #! TO CHANGE TO THE CORRECT OUTPUT
                 }
                 try:
                     response = requests.post(callback_url, json=payload)
