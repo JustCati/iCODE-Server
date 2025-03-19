@@ -23,8 +23,8 @@ class iCoDeModel(nn.Module):
         testra_output = [None]
         yolo_output = [None]
 
-        testra_thread = threading.Thread(target=self.__run_testra)
-        yolo_thread = threading.Thread(target=self.__run_yolo)
+        testra_thread = threading.Thread(target=self.__run_testra, args=(x,))
+        yolo_thread = threading.Thread(target=self.__run_yolo, args=(x,))
 
         testra_thread.start()
         yolo_thread.start()
