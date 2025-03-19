@@ -32,4 +32,7 @@ class iCoDeModel(nn.Module):
         testra_thread.join()
         yolo_thread.join()
 
+        #TODO: logics here that checks when testra is = 1 then look for yolo
+        #TODO: or just sends everything and then the visor do what it wants??
+
         return testra_output, yolo_output #* testra_output = mode of the testra output, yolo_output = active object (how we manage the mode vs frame by frame prediction of yolo?)
