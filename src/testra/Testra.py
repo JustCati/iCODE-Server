@@ -50,8 +50,6 @@ class Testra(nn.Module):
         max_indices = results.argmax(axis=1)
 
         idx_nonzero = np.where(max_indices != 0)[0]
-        print("Nonzero: ", idx_nonzero.shape[0])
-        print("Threshold: ", self.threshold)
         if idx_nonzero.shape[0] <= self.threshold:
             return 0
 
