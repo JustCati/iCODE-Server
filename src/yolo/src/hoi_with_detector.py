@@ -18,6 +18,8 @@ def get_yolo_classes(frames):
     print("class vector", class_vector)
     
     batch_size = frames.shape[0]
+    # Forse non è meglio creare una batch di 30 immagini e fare 
+    # una sola inferenza anziché 30 inferenze su singole immagini?
     for i in range(batch_size):
         if i >= 30:
             break
