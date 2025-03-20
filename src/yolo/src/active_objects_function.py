@@ -1,4 +1,4 @@
-from iou_function import iou    
+from src.iou_function import iou    
 
 def active_objects_retrieval(results, iou_threshold=0.1):
     
