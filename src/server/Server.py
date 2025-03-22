@@ -1,7 +1,7 @@
 import ssl
+import queue
 import http.server
 
-from src.queue.FrameQueue import FrameQueue
 from src.queue.BatchQueue import BatchQueue
 from src.queue.QueueManager import QueueManager
 
@@ -24,7 +24,7 @@ class Server():
         self.handler_class = self.FrameRequestHandler
         self.httpd = http.server.HTTPServer((self.ip, self.port), self.handler_class)
 
-        self.frame_queue = FrameQueue(max_queue_size)
+        self.frame_queue = queue.Queue(max_queue_size)
         self.batch_queue = BatchQueue(self.frame_queue, max_queue_size)
         self.queue_manager = QueueManager(self.frame_queue, max_queue_size)
 
@@ -37,17 +37,15 @@ class Server():
     class FrameRequestHandler(http.server.BaseHTTPRequestHandler):
         def do_POST(self):
             print()
-            print("Received POST request.")
             content_length = int(self.headers.get('Content-Length', 0))
             frame_data = self.rfile.read(content_length)
             client_ip = self.client_address[0]
-            print(f"Received frame ({len(frame_data)} bytes).")
 
             self.send_response(200)
             self.end_headers()
             self.flush_headers()
             self.wfile.write(b"OK")
-            print("Sent response.")
+            print("Received POST request and sent response.")
 
             self.server.server_instance.last_client_ip = client_ip
             self.__class__.batch_queue.put(frame_data)

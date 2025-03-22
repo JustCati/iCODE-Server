@@ -17,7 +17,7 @@ class QueueManager():
 
     def dequeue_manager(self):
         while True:
-            batch_frames = self.frame_queue.dequeue_batch(self.batch_size)
+            frame = self.frame_queue.get()
 
-            self.model_queue.put(batch_frames)
-            self.graphic_queue.put(batch_frames, timeout=0.1)
+            self.model_queue.put(frame)
+            self.graphic_queue.put(frame)
