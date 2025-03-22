@@ -20,4 +20,4 @@ class QueueManager():
             batch_frames = self.frame_queue.dequeue_batch(self.batch_size)
 
             self.model_queue.put(batch_frames)
-            self.graphic_queue.put(batch_frames)
+            self.graphic_queue.put(batch_frames, timeout=0.1)
