@@ -9,10 +9,9 @@ from src.yolo.src.active_objects_function import active_objects_retrieval
 
 
 
-WEIGHTS_PATH = os.path.join(os.path.dirname(__file__), "checkpoint/YOLOWorldM.pt")
 
 class Yolo(nn.Module):
-    def __init__(self, weights_path = WEIGHTS_PATH, iou_thresh = 0.1, conf_score = 0.5, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")):
+    def __init__(self, weights_path, iou_thresh = 0.1, conf_score = 0.5, device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")):
         super().__init__()
 
         self.weights_path = weights_path
@@ -30,7 +29,7 @@ class Yolo(nn.Module):
             frame_np = (frame_np * 255).astype(np.uint8)
             frame_rgb = cv2.cvtColor(frame_np, cv2.COLOR_RGB2BGR)
 
-            results = self.yolo_model.predict(frame_rgb, conf=self.conf_score)
+            results = self.yolo_model.predict(frame_rgb, conf=self.conf_score, verbose=False)
             best_obj = active_objects_retrieval(results)
 
             if best_obj is not None and 0 <= best_obj["obj_id"] < 25:
