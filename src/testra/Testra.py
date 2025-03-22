@@ -55,5 +55,4 @@ class Testra(nn.Module):
         if idx_nonzero.shape[0] <= self.threshold:
             return 0
 
-        print("Mode: ", mode(max_indices[idx_nonzero]))
         return mode(max_indices[idx_nonzero])
