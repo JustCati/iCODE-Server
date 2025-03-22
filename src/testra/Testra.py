@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 from statistics import mode
+from torchvision.models import efficientnet_v2_s
 
 from src.testra.src.rekognition_online_action_detection.models import build_model
 from src.testra.src.rekognition_online_action_detection.utils.env import setup_environment
@@ -22,10 +23,8 @@ class Testra(nn.Module):
         self.threshold = float(cfg.MODEL.LSTR.WORK_MEMORY_LENGTH) * 30.0 / 100
 
         # Build backbone
-        effnet = torch.hub.load('hankyul2/EfficientNetV2-pytorch', 'efficientnet_v2_s', pretrained=True)
-        self.backbone = nn.Sequential(*list(effnet.children())[:-1], 
-                                *list(list(effnet.children())[-1].children())[:-2],
-                                nn.AvgPool1d(kernel_size=257, stride=1))
+        self.backbone = efficientnet_v2_s(weights="DEFAULT")
+        self.backbone.classifier = nn.Linear(1280, 1024)
         self.backbone.to(self.device)
         self.backbone.eval()
 
