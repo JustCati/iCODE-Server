@@ -15,9 +15,9 @@ warnings.filterwarnings("ignore")
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "testra", "src"))
 
-from yolo.Yolo import Yolo #! FOR FUTURE USE
+from yolo.Yolo import Yolo
 from testra.Testra import Testra
-from iCoDeModel.iCoDeModel import iCoDeModel #! FOR FUTURE USE
+from iCoDeModel.iCoDeModel import iCoDeModel
 
 from server.Server import Server
 from testra.src.rekognition_online_action_detection.utils.parser import load_cfg
@@ -25,36 +25,42 @@ from testra.src.rekognition_online_action_detection.utils.env import setup_envir
 
 
 
-# Goes into ICoDeModel
 def model_worker(model, queue, frame_rate, server):
-        while True:
-            batch_frames = []
-            for _ in range(frame_rate):
-                batch_frames.append(queue.get())
+    action_dict = {
+        0: "UNKNOWN",
+        1: "CONTACT",
+        2: "DE-CONTACT",
+    }
+    while True:
+        batch_frames = []
+        for _ in range(frame_rate):
+            batch_frames.append(queue.get())
 
-            frames = []
-            for frame_bytes in batch_frames:
-                frame = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
-                frame = transforms.ToTensor()(frame)
-                frames.append(frame)
+        frames = []
+        for frame_bytes in batch_frames:
+            frame = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
+            frame = transforms.ToTensor()(frame)
+            frames.append(frame)
 
-            frames = torch.stack(frames, dim=0)
-            with torch.no_grad(), torch.autocast(device_type="cuda"):
-                output = model(frames)
+        frames = torch.stack(frames, dim=0)
+        with torch.no_grad(), torch.autocast(device_type="cuda"):
+            output = model(frames)
+        action = action_dict[int(output[0])]
+        obj = str(output[1])
 
-            if server.last_client_ip:
-                callback_url = f"http://{server.last_client_ip}:{server.visor_callback_port}/callback/"
-                payload = {
-                    "timestamp": time.time(),
-                    "action": int(output) #! TO CHANGE TO THE CORRECT OUTPUT
-                }
-                try:
-                    response = requests.post(callback_url, json=payload)
-                    print("Sent callback to visor at", callback_url, "Response:", response.status_code)
-                except Exception as e:
-                    print("Error sending callback:", e)
-            else:
-                print("No client IP available for callback.")
+        if server.last_client_ip:
+            callback_url = f"http://{server.last_client_ip}:{server.visor_callback_port}/callback/"
+            payload = {
+                "action": action,
+                "obj": obj,
+            }
+            try:
+                response = requests.post(callback_url, json=payload)
+                print("Sent callback to visor at", callback_url, "Response:", response.status_code)
+            except Exception as e:
+                print("Error sending callback:", e)
+        else:
+            print("No client IP available for callback.")
 
 
 
@@ -69,8 +75,7 @@ def main(args):
     cert_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "server", "cert", "cert.pem")
 
     server = Server(key_file, cert_file, ip="192.168.1.101", port=34545, max_queue_size=10000)
-    # model = iCoDeModel(Testra(cfg), Yolo(device), device=device) #! FOR FUTURE USE
-    model = Testra(cfg)
+    model = iCoDeModel(Testra(cfg), Yolo(args.yolo_path, device=device), device=device)
 
     try:
         server_thread = threading.Thread(target=server.run, daemon=True)
