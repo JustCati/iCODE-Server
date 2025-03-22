@@ -3,6 +3,11 @@ import http.server
 
 from src.queue.FrameQueue import FrameQueue
 from src.queue.BatchQueue import BatchQueue
+from src.queue.QueueManager import QueueManager
+
+from graphics.GraphicsStreamer import Streamer
+
+
 
 
 class Server():
@@ -21,6 +26,9 @@ class Server():
 
         self.frame_queue = FrameQueue(max_queue_size)
         self.batch_queue = BatchQueue(self.frame_queue, max_queue_size)
+        self.queue_manager = QueueManager(self.frame_queue, max_queue_size)
+
+        self.graphics = Streamer(self.queue_manager.graphic_queue)
 
         self.handler_class.batch_queue = self.batch_queue
         self.httpd.server_instance = self
@@ -61,5 +69,5 @@ class Server():
             print("Server has been shut down.")
 
 
-    def get_frame_queue(self):
-        return self.frame_queue
+    def get_model_queue(self):
+        return self.queue_manager.model_queue

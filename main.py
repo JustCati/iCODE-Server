@@ -25,7 +25,7 @@ from testra.src.rekognition_online_action_detection.utils.env import setup_envir
 
 
 
-
+# Goes into ICoDeModel
 def model_worker(model, queue, frame_rate, server):
         while True:
             batch_frames = queue.dequeue_batch(frame_rate)
