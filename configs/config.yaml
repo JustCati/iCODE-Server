@@ -5,7 +5,7 @@ DATA:
   DATA_INFO: 'configs/data_info.json'
 INPUT:
   MODALITY: 'visual'
-  VISUAL_FEATURE: 'DINOv2'
+  VISUAL_FEATURE: 'EfficientNetV2'
   MOTION_FEATURE: 'DINOv2' # not used
   OBJECT_FEATURE: 'DINOv2' # not used
   TARGET_PERFRAME: 'target_end_perframe_cdc'

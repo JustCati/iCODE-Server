@@ -24,7 +24,10 @@ class Testra(nn.Module):
 
         # Build backbone
         self.backbone = efficientnet_v2_s(weights="DEFAULT")
-        self.backbone.classifier = nn.Linear(1280, 1024)
+        if "distilled" in cfg.INPUT.VISUAL_FEATURE:
+            self.backbone.classifier = nn.Linear(1280, 1024)
+        else:
+            self.backbone.classifier = nn.Identity()
         self.backbone.to(self.device)
         self.backbone.eval()
 
