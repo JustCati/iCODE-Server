@@ -1,13 +1,13 @@
-import torch
-import torch.nn as nn
-import numpy as np
-import cv2
-from ultralytics import YOLOWorld
-from src.iou_function import iou
-from src.active_objects_function import active_objects_retrieval
-from statistics import mode
-import sys
 import os
+import cv2
+import torch
+import numpy as np
+import torch.nn as nn
+from statistics import mode
+from ultralytics import YOLOWorld
+from src.yolo.src.active_objects_function import active_objects_retrieval
+
+
 
 WEIGHTS_PATH = os.path.join(os.path.dirname(__file__), "checkpoint/YOLOWorldM.pt")
 
