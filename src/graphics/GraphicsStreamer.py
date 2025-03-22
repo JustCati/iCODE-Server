@@ -6,8 +6,6 @@ from PIL import Image
 
 
 
-
-
 class Streamer():
     def __init__(self, graphic_queue):
         self.graphic_queue = graphic_queue
