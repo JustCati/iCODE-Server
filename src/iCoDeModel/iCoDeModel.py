@@ -11,18 +11,22 @@ class iCoDeModel(nn.Module):
         self.yolo = yolo
         self.device = device
 
+        self.testra_output = None
+        self.yolo_output = None
+
 
     def __run_testra(self, x):
+        self.testra_output = None
+        self.testra_output = self.testra(x)
         return self.testra(x)
 
     def __run_yolo(self, x):
+        self.yolo_output = None
+        self.yolo_output = self.yolo(x)
         return self.yolo(x)
 
 
     def forward(self, x):
-        testra_output = [None]
-        yolo_output = [None]
-
         testra_thread = threading.Thread(target=self.__run_testra, args=(x,))
         yolo_thread = threading.Thread(target=self.__run_yolo, args=(x,))
 
@@ -32,7 +36,4 @@ class iCoDeModel(nn.Module):
         testra_thread.join()
         yolo_thread.join()
 
-        #TODO: logics here that checks when testra is = 1 then look for yolo
-        #TODO: or just sends everything and then the visor do what it wants??
-
-        return testra_output, yolo_output #* testra_output = mode of the testra output, yolo_output = active object (how we manage the mode vs frame by frame prediction of yolo?)
+        return self.testra_output, self.yolo_output
