@@ -28,7 +28,9 @@ from testra.src.rekognition_online_action_detection.utils.env import setup_envir
 # Goes into ICoDeModel
 def model_worker(model, queue, frame_rate, server):
         while True:
-            batch_frames = queue.dequeue_batch(frame_rate)
+            batch_frames = []
+            for _ in range(frame_rate):
+                batch_frames.append(queue.get())
 
             frames = []
             for frame_bytes in batch_frames:
@@ -74,11 +76,13 @@ def main(args):
         server_thread = threading.Thread(target=server.run, daemon=True)
         server_thread.start()
 
-        model_thread = threading.Thread(target=model_worker, daemon=True, args=(model, server.frame_queue, FRAMERATE, server))
+        model_thread = threading.Thread(target=model_worker, daemon=True, args=(model, server.get_model_queue(), FRAMERATE, server))
         model_thread.start()
 
-        while True:
-            time.sleep(1)
+        model_thread.join()
+        server_thread.join()
+        server.batch_queue.batch_worker_thread.join()
+
     except KeyboardInterrupt:
         model_thread.join()
         server_thread.join()
