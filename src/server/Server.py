@@ -3,8 +3,6 @@ import queue
 import http.server
 
 from src.queue.BatchQueue import BatchQueue
-from src.queue.QueueManager import QueueManager
-
 from graphics.GraphicsStreamer import Streamer
 
 
@@ -24,11 +22,11 @@ class Server():
         self.handler_class = self.FrameRequestHandler
         self.httpd = http.server.HTTPServer((self.ip, self.port), self.handler_class)
 
-        self.frame_queue = queue.Queue(max_queue_size)
-        self.batch_queue = BatchQueue(self.frame_queue, max_queue_size)
-        self.queue_manager = QueueManager(self.frame_queue, max_queue_size)
+        self.model_queue = queue.Queue(max_queue_size)
+        self.graphic_queue = queue.Queue(max_queue_size)
+        self.batch_queue = BatchQueue(self.model_queue, self.graphic_queue, max_queue_size)
 
-        self.graphics = Streamer(self.queue_manager.graphic_queue)
+        self.graphics = Streamer(self.graphic_queue)
 
         self.handler_class.batch_queue = self.batch_queue
         self.httpd.server_instance = self
@@ -68,4 +66,4 @@ class Server():
 
 
     def get_model_queue(self):
-        return self.queue_manager.model_queue
+        return self.model_queue
