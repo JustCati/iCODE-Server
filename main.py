@@ -32,6 +32,7 @@ def model_worker(model, queue, frame_rate, server):
         2: "DE-CONTACT",
     }
     obj_names = {
+        -1: 'UNKNOWN',
         0: 'Power supply',
         1: 'Power supply cables',
         2: 'Oscilloscope',
