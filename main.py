@@ -31,6 +31,35 @@ def model_worker(model, queue, frame_rate, server):
         1: "CONTACT",
         2: "DE-CONTACT",
     }
+    obj_names = {
+        0: 'Power supply',
+        1: 'Power supply cables',
+        2: 'Oscilloscope',
+        3: 'Oscilloscope probe tip',
+        4: 'Oscilloscope ground clip',
+        5: 'Welder station',
+        6: 'Welder base',
+        7: 'Welder probe tip',
+        8: 'Electric screwdriver',
+        9: 'Electric screwdriver battery',
+        10: 'Battery connector',
+        11: 'Screwdriver',
+        12: 'Pliers',
+        13: 'High voltage board',
+        14: 'Low voltage board',
+        15: 'Low voltage board screen',
+        16: 'Register',
+        17: 'Left red button',
+        18: 'Left green button',
+        19: 'Right red button',
+        20: 'Right green button',
+        21: 'Socket 1',
+        22: 'Socket 2',
+        23: 'Socket 3',
+        24: 'Socket 4',
+        25: 'Hand'
+    }
+
     while True:
         batch_frames = []
         for _ in range(frame_rate):
@@ -46,7 +75,7 @@ def model_worker(model, queue, frame_rate, server):
         with torch.no_grad(), torch.autocast(device_type="cuda"):
             output = model(frames)
         action = action_dict[int(output[0])]
-        obj = str(output[1])
+        obj = obj_names[int(output[1])]
 
         if server.last_client_ip:
             callback_url = f"http://{server.last_client_ip}:{server.visor_callback_port}/callback/"
